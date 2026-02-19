@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detector</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #4a4a8a;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        p.subtitle {
+            color: #888;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        textarea:focus { outline: none; border-color: #667eea; }
+        button {
+            margin-top: 16px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        #output {
+            margin-top: 24px;
+            padding: 18px;
+            background: #f4f4ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+            display: none;
+        }
+        #output.error { border-left-color: #e74c3c; background: #fff5f5; color: #c0392b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Emotion Detector</h1>
+        <p class="subtitle">Powered by IBM Watson NLP — detect emotions in any text</p>
+
+        <textarea id="textToAnalyse" placeholder="Type your text here... e.g., 'I am so happy today!'"></textarea>
+        <button onclick="analyzeEmotion()">Detect Emotions</button>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function analyzeEmotion() {
+            const text = document.getElementById('textToAnalyse').value.trim();
+            const output = document.getElementById('output');
+
+            if (!text) {
+                output.style.display = 'block';
+                output.className = 'error';
+                output.innerText = 'Please enter some text to analyze.';
+                return;
+            }
+
+            output.style.display = 'block';
+            output.className = '';
+            output.innerText = 'Analyzing...';
+
+            const url = `/emotionDetector?textToAnalyse=${encodeURIComponent(text)}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    output.style.display = 'block';
+                    if (data.includes('Invalid text')) {
+                        output.className = 'error';
+                    } else {
+                        output.className = '';
+                    }
+                    output.innerText = data;
+                })
+                .catch(err => {
+                    output.className = 'error';
+                    output.innerText = 'Error connecting to server: ' + err;
+                });
+        }
+
+        // Allow Enter key to trigger analysis (Shift+Enter for new line)
+        document.getElementById('textToAnalyse').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                analyzeEmotion();
+            }
+        });
+    </script>
+</body>
+</html>
